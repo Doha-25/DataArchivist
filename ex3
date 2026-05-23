@@ -2,45 +2,68 @@ import sys
 
 
 def secure_archive(
-    filename: str, action: str = "read", content: str = ""
+    filename: str,
+    action: str = "read",
+    content: str = ""
 ) -> tuple[bool, str]:
-    """Provides safe access to a file for reading or writing using a context manager."""
-    try:
-        if action == "read":
-            with open(filename, "r") as f:
-                data = f.read()
-            return True, data
+    """Safely handles reading or writing a file using context managers[cite: 165, 167].
 
-        elif action == "write":
-            with open(filename, "w") as f:
-                f.write(content)
+    Args:
+        filename: The path to the file[cite: 169].
+        action: Either 'read' or 'write'[cite: 169]. Defaults to 'read'.
+        content: The text content to write if action is 'write'[cite: 169].
+
+    Returns:
+        A tuple containing a boolean success flag and the resulting string
+        (either the file content or an error message) [cite: 168].
+    """
+    if action == "write":
+        try:
+            with open(filename, "w") as file:  # [cite: 165, 166]
+                file.write(content)
             return True, "Content successfully written to file"
+        except Exception as e:
+            return False, str(e)
 
-        else:
-            return False, f"Unknown action: '{action}'"
-
+    # Default action is 'read'
+    try:
+        with open(filename, "r") as file:  # [cite: 165, 166]
+            data: str = file.read()
+        return True, data
     except Exception as e:
         return False, str(e)
 
 
 def main() -> None:
-    """Gets the filename from command line arguments and tests secure_archive."""
+    """Main execution block handling command-line arguments via terminal."""
+    # Check if the user provided a filename argument in the terminal
     if len(sys.argv) < 2:
         print("Usage: python3 ft_vault_security.py <filename>")
-        return
+        sys.exit(1)
 
-    target_file = sys.argv[1]
+    target_file: str = sys.argv[1]
 
     print("=== Cyber Archives Security ===")
 
-    print(f"Using 'secure_archive' to read from file '{target_file}':")
-    success, result = secure_archive(target_file, "read")
-    print((success, result))
+    # 1. Nonexistent file test demonstration (matches subject example style)
+    print("Using 'secure_archive' to read from a nonexistent file:")
+    print(secure_archive("/not/existing/file", "read"))
 
-    if success:
-        print("\nUsing 'secure_archive' to write previous content to a new file:")
-        write_res = secure_archive("backup_" + target_file, "write", result)
-        print(write_res)
+    # 2. Inaccessible file test demonstration
+    print("Using 'secure_archive' to read from an inaccessible file:")
+    print(secure_archive("/etc/master.passwd", "read"))
+
+    # 3. Dynamic test using the file you passed via the terminal!
+    print(f"Using 'secure_archive' to read from a regular file ('{target_file}'):")
+    result_read = secure_archive(target_file, "read")
+    print(result_read)
+
+    # 4. If the read was successful, test writing that content to a backup file
+    if result_read[0]:
+        backup_file = "vault_backup.txt"
+        print(f"Using 'secure_archive' to write previous content to '{backup_file}':")
+        result_write = secure_archive(backup_file, "write", result_read[1])
+        print(result_write)
 
 
 if __name__ == "__main__":
