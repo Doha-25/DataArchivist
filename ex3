@@ -6,28 +6,16 @@ def secure_archive(
     action: str = "read",
     content: str = ""
 ) -> tuple[bool, str]:
-    """Safely handles reading or writing a file using context managers[cite: 165, 167].
-
-    Args:
-        filename: The path to the file[cite: 169].
-        action: Either 'read' or 'write'. Defaults to 'read'[cite: 169].
-        content: The text content to write if action is 'write'[cite: 169].
-
-    Returns:
-        A tuple containing a boolean success flag and the resulting string
-        (either the file content or an error message) [cite: 168].
-    """
     if action == "write":
         try:
-            with open(filename, "w") as file:  # [cite: 165]
+            with open(filename, "w") as file:
                 file.write(content)
-            return True, "Content successfully written to file"  # 
+            return True, "Content successfully written to file"
         except Exception as e:
             return False, str(e)
 
-    # Default action is 'read'
     try:
-        with open(filename, "r") as file:  # [cite: 165]
+        with open(filename, "r") as file:
             data: str = file.read()
         return True, data
     except Exception as e:
@@ -35,36 +23,35 @@ def secure_archive(
 
 
 def main() -> None:
-    """Main execution block matching the 4 subject output cases exactly."""
     if len(sys.argv) < 2:
         print("Usage: python3 ft_vault_security.py <filename>")
         sys.exit(1)
 
-    # Grab the file you enter via the terminal
     user_file: str = sys.argv[1]
+    print("=== Cyber Archives Security ===")
 
-    print("=== Cyber Archives Security ===")  # 
+    success, result = secure_archive(user_file, "read")
 
-    # Case 1: Read from a nonexistent file
-    print("Using 'secure_archive' to read from a nonexistent file:")  # 
-    print(secure_archive("/not/existing/file", "read"))  # 
-
-    # Case 2: Read from an inaccessible file
-    print("Using 'secure_archive' to read from an inaccessible file:")  # 
-    print(secure_archive("/etc/master.passwd", "read"))  # 
-
-    # Case 3: Read from your regular file passed in the terminal
-    print("Using 'secure_archive' to read from a regular file:")  # 
-    result_read = secure_archive(user_file, "read")
-    print(result_read)
-
-    # Case 4: Write that content to a new file
-    print("Using 'secure_archive' to write previous content to a new file:")  # 
-    if result_read[0]:
-        print(secure_archive("new_vault_archive.txt", "write", result_read[1]))
+    if success:
+        print("Using 'secure_archive' to read from a regular file:")
+        print((True, result))
     else:
-        # Fallback message matching the successful write style if case 3 failed
-        print(secure_archive("new_vault_archive.txt", "write", "Fallback data"))
+        err_msg = result.lower()
+
+        if "permission denied" in err_msg or "denied" in err_msg:
+            print("Using 'secure_archive' to read from an inaccessible file:")
+            print((False, result))
+        else:
+            print("Using 'secure_archive' to read from a nonexistent file:")
+            print((False, result))
+
+            print("\nUsing 'secure_archive' to write previous content to a new file:")
+            write_status, write_res = secure_archive(
+                user_file,
+                "write",
+                "New content saved to the vault."
+            )
+            print((write_status, write_res))
 
 
 if __name__ == "__main__":
