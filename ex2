@@ -1,0 +1,69 @@
+import sys
+
+
+def stream_management() -> None:
+    if len(sys.argv) < 2:
+        sys.stderr.write("Usage:\nft_stream_management.py <file>\n")
+        return
+
+    filename: str = sys.argv[1]
+    sys.stdout.write("=== Cyber Archives Recovery & Preservation ===\n")
+    sys.stdout.write(f"Accessing file '{filename}'\n")
+
+    f = None
+    try:
+        f = open(filename, "r")
+        lines = f.readlines()
+    except Exception as e:
+        sys.stderr.write(f"[STDERR] Error opening file '{filename}': {e}\n")
+        return
+    finally:
+        if f is not None:
+            f.close()
+            sys.stdout.write(f"File '{filename}' closed.\n")
+
+    # طباعة النص الأصلي
+    sys.stdout.write("---\n")
+    for line in lines:
+        sys.stdout.write(line)
+    sys.stdout.write("---\n")
+
+    # تعديل الأسطر
+    transformed = []
+    for line in lines:
+        stripped = line.rstrip("\r\n")
+        if stripped:
+            transformed.append(stripped + "#\n")
+        else:
+            transformed.append("\n")
+
+    # طباعة النص المعدل
+    sys.stdout.write("Transform data:\n---\n")
+    for line in transformed:
+        sys.stdout.write(line)
+    sys.stdout.write("---\n")
+
+    # طلب اسم ملف الحفظ باستخدام sys.stdin
+    sys.stdout.write("Enter new file name (or empty): ")
+    sys.stdout.flush()
+    new_file = sys.stdin.readline().rstrip("\r\n")
+
+    if not new_file.strip():
+        sys.stdout.write("Not saving data.\n")
+        return
+
+    sys.stdout.write(f"Saving data to '{new_file}'\n")
+    out_f = None
+    try:
+        out_f = open(new_file, "w")
+        out_f.writelines(transformed)
+        sys.stdout.write(f"Data saved in file '{new_file}'.\n")
+    except Exception as e:
+        sys.stderr.write(f"[STDERR] Error opening file '{new_file}': {e}\n")
+    finally:
+        if out_f is not None:
+            out_f.close()
+
+
+if __name__ == "__main__":
+    stream_management()
