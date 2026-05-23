@@ -1,0 +1,66 @@
+import sys
+
+
+def archive_creation() -> None:
+    if len(sys.argv) < 2:
+        print("Usage:\nft_archive_creation.py <file>")
+        return
+
+    filename: str = sys.argv[1]
+    print("=== Cyber Archives Recovery & Preservation ===")
+    print(f"Accessing file '{filename}'")
+
+    f = None
+    try:
+        f = open(filename, "r")
+        lines = f.readlines()
+    except Exception as e:
+        print(f"Error opening file '{filename}': {e}")
+        return
+    finally:
+        if f is not None:
+            f.close()
+            print(f"File '{filename}' closed.")
+
+    # طباعة المحتوى الأصلي
+    print("---")
+    for line in lines:
+        print(line, end="")
+    print("---")
+
+    # تعديل الأسطر وإضافة #
+    transformed = []
+    for line in lines:
+        stripped = line.rstrip("\r\n")
+        if stripped:
+            transformed.append(stripped + "#\n")
+        else:
+            transformed.append("\n")
+
+    # طباعة المحتوى المعدل
+    print("Transform data:\n---")
+    for line in transformed:
+        print(line, end="")
+    print("---")
+
+    # حفظ الملف الجديد
+    new_file = input("Enter new file name (or empty): ")
+    if not new_file.strip():
+        print("Not saving data.")
+        return
+
+    print(f"Saving data to '{new_file}'")
+    out_f = None
+    try:
+        out_f = open(new_file, "w")
+        out_f.writelines(transformed)
+        print(f"Data saved in file '{new_file}'.")
+    except Exception as e:
+        print(f"Error saving file '{new_file}': {e}")
+    finally:
+        if out_f is not None:
+            out_f.close()
+
+
+if __name__ == "__main__":
+    archive_creation()
