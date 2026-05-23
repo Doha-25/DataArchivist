@@ -1,11 +1,20 @@
 import sys
+from typing import Tuple
 
 
 def secure_archive(
-    filename: str,
-    action: str = "read",
-    content: str = ""
-) -> tuple[bool, str]:
+    filename: str, action: str = "read", content: str = ""
+) -> Tuple[bool, str]:
+    """Safely reads from or writes to a file using context managers.
+
+    Args:
+        filename (str): The path to the target file.
+        action (str): The operation to perform ('read' or 'write').
+        content (str): The text content to write (only used if action='write').
+
+    Returns:
+        Tuple[bool, str]: (Success status, File contents or error message).
+    """
     if action == "write":
         try:
             with open(filename, "w") as file:
@@ -14,44 +23,61 @@ def secure_archive(
         except Exception as e:
             return False, str(e)
 
-    try:
-        with open(filename, "r") as file:
-            data: str = file.read()
-        return True, data
-    except Exception as e:
-        return False, str(e)
+    elif action == "read":
+        try:
+            with open(filename, "r") as file:
+                data = file.read()
+            return True, data
+        except Exception as e:
+            return False, str(e)
+
+    else:
+        return False, f"Unknown action: '{action}'"
 
 
 def main() -> None:
-    if len(sys.argv) < 2:
-        print("Usage: python3 ft_vault_security.py <filename>")
-        sys.exit(1)
-
-    user_file: str = sys.argv[1]
+    """Demonstrates and tests the secure_archive function execution."""
     print("=== Cyber Archives Security ===")
 
-    success, result = secure_archive(user_file, "read")
+    # Test Case 1: Read from a nonexistent file
+    print("\nUsing 'secure_archive' to read from a nonexistent file:")
+    result_nonexistent = secure_archive("/not/existing/file", action="read")
+    print(result_nonexistent)
 
-    if success:
-        print("Using 'secure_archive' to read from a regular file:")
-        print((True, result))
-    else:
-        err_msg = result.lower()
+    # Test Case 2: Read from an inaccessible file
+    print("\nUsing 'secure_archive' to read from an inaccessible file:")
+    result_inaccessible = secure_archive("/etc/master.passwd", action="read")
+    print(result_inaccessible)
 
-        if "permission denied" in err_msg or "denied" in err_msg:
-            print("Using 'secure_archive' to read from an inaccessible file:")
-            print((False, result))
-        else:
-            print("Using 'secure_archive' to read from a nonexistent file:")
-            print((False, result))
+    # Test Case 3: Read from a regular file (Simulated using a temporary run)
+    # Creating a dummy text file to replicate the assignment's context
+    sample_filename = "ancient_fragment.txt"
+    sample_content = (
+        "[FRAGMENT 001] Digital preservation protocols established 2087\n"
+        "[FRAGMENT 002] Knowledge must survive the entropy wars\n"
+        "[FRAGMENT 003] Every byte saved is a victory against oblivion\n"
+    )
 
-            print("\nUsing 'secure_archive' to write previous content to a new file:")
-            write_status, write_res = secure_archive(
-                user_file,
-                "write",
-                "New content saved to the vault."
+    try:
+        with open(sample_filename, "w") as f:
+            f.write(sample_content)
+
+        print("\nUsing 'secure_archive' to read from a regular file:")
+        result_read = secure_archive(sample_filename, action="read")
+        print(result_read)
+
+        # Test Case 4: Write previous content to a new file
+        if result_read[0]:
+            print(
+                "\nUsing 'secure_archive' to write previous content to a new file:"
             )
-            print((write_status, write_res))
+            result_write = secure_archive(
+                "vault_backup.txt", action="write", content=result_read[1]
+            )
+            print(result_write)
+
+    except Exception as e:
+        print(f"[ERROR] Failed setup for presentation simulation: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":
